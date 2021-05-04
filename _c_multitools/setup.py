@@ -1,7 +1,7 @@
 from distutils.core import setup, Extension
 
 _c_maths_ext = Extension(
-    name="_c_maths_",
+    name="_c_maths",
     sources=["_c_maths.c"]
 )
 

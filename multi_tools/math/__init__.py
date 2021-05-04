@@ -1,6 +1,6 @@
 from multi_tools import env, exceptions
 from typing import overload, Union, Literal, Any
-import sys
+
 
 if env.module_installed("_c_maths"):
     import _c_maths
