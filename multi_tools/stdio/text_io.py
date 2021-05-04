@@ -13,6 +13,19 @@ class TextIO:
     def __init__(self, io_stream: TextIOWrapper, customName=None): ...
 
     def __init__(self, x=None, customName=None):
+        """
+        Create an return a basic IO stream.
+
+        Signatures:
+
+        - TextIO(file: str, __customName: Optional[str])
+
+          Create a IO stream that points to the file 'file'.
+
+        - TextIO(io_stream: _io.TextIOWrapper, __customName: Optional[str])
+
+          Create a IO stream that points to the same file as 'io_stream' and has the same type as it.
+        """
         self._name = None
         self._io_stream = None
         if isinstance(x, str):
@@ -31,6 +44,12 @@ class TextIO:
 
     @final
     def write(self, text: str, cut_content=True, end="\n") -> None:
+        """
+        Write (text + end) to the file the IO stream points to.
+        Works only if type is 'IO' or 'O'.
+        As the above '@final' suggests, this method isn't
+        overrideable.
+        """
         original_file = ""
         if not cut_content:
             if self._io_stream.readable():
@@ -46,6 +65,12 @@ class TextIO:
 
     @final
     def read(self, size=1) -> str:
+        """
+        Read from the file the IO stream points to and return the result.
+        Works only if type is 'IO' or 'I'.
+        As the above '@final' suggests, this method isn't
+        overrideable.
+        """
         if not self._io_stream.readable():
             wait(0.1)
             raise BlockingIOError(f"Object \"{self._name}\" cannot be read.")
@@ -54,10 +79,20 @@ class TextIO:
 
     @final
     def readlines(self) -> List[str]:
+        """
+        Pretty much the same as read().
+        As the above '@final' suggests, this method isn't
+        overrideable.
+        """
         return self.read().split("\n")
 
     @final
     def configure(self, new_target: str or TextIOWrapper):
+        """
+        Changes the file on which the IO stream points for new_target.
+        As the above '@final' suggests, this method isn't
+        overrideable.
+        """
         self.__redirect__(new_target)
 
     def __write__(self, text: str):
@@ -69,7 +104,7 @@ class TextIO:
 
     def __read__(self, size: int, spec=False):
         """
-        Read text from stream. Can be overridden.
+        Read text from stream and return. Can be overridden.
         **Doesn't handle any error, you should use read() instead**
         """
         if spec:  # 'spec' is a specific parameter used only by multi_tools.console.io.IStream. It should not be used anywhere else.
@@ -122,6 +157,7 @@ class TextIO:
 class _Stream:
     def __init__(self, path: str):
         """
+        Path string to IO stream with type 'IO' converter.
         **Only for internal use**
         """
         if not os.path.exists(path):
