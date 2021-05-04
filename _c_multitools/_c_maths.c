@@ -1,149 +1,217 @@
-#define PY_SSIZE_T_CLEAN
+﻿#define PY_SSIZE_T_CLEAN
 #include <Python.h>
 #include "structmember.h"
-
-
-// implement an "infinite" type:
-
-typedef struct {
-    PyObject_HEAD
-
-
-    /* Type-specific fields go here. */
-    int pos;
-
-
-} InfiniteObject;
-
-
-PyObject* CustomRepr(PyObject* self) {
-    return PyUnicode_FromString("Hello");
-}
-
-
-static PyTypeObject InfiniteType = {
-    PyVarObject_HEAD_INIT(NULL, 0)
-    .tp_name = "_c_maths.infinite",
-    .tp_doc = "A type that represents infinity.",
-    .tp_basicsize = sizeof(InfiniteObject),
-    .tp_itemsize = 0,
-    .tp_flags = Py_TPFLAGS_DEFAULT,
-    .tp_new = PyType_GenericNew,
-    .tp_repr = CustomRepr,
-};
-
+#define PyObj static PyObject*
 
 
 /*
- * Implement __doc__ for all extension functions:
- */
+* _c_maths functions:
+*/
 
-PyDoc_STRVAR(exp__doc, "Return exp(number). \nnumber must be a float.\n exp(number: float) -> float");
+PyObj exp_(PyObject* module_, PyObject* args) {
 
-PyDoc_STRVAR(pow__doc, "Return x raised to the power of n.\n x is a real number, while n must be an integer.\n power(x: float, n: int) -> float");
-
-PyDoc_STRVAR(root_doc, "Return x raised to the power of 1 / n; or the n-th root of x.\n x is a real number, while n must be an integer.\n root(x: float, n: int) -> float");
-
-
-// exp(number: float) -> float
-PyObject *exp_(PyObject *self, PyObject *args) {
-    /* Shared references that do not need Py_DECREF before returning. */
-    double number;
-    PyObject* result;
-
-    /* Parse positional arguments */
-    if (!PyArg_ParseTuple(args, "d", &number)) {
+    double x = 0.0;
+    
+    if (!PyArg_ParseTuple(args, "d", &x)) {
         return NULL;
     }
 
-    /* Function implementation starts here */
-
-    result = PyLong_FromDouble(exp(number));
-
-    return result;  // return exp(number)
+    return PyFloat_FromDouble(exp(x));
 }
 
-// power(x: float, n: int) -> float
-PyObject* power_(PyObject* self, PyObject* args) {
-    double x;
-    double n;
 
-    // parse python arguments:
-    if (!PyArg_ParseTuple(args, "di", &x, &n)) {
+/*
+* Class Complex():
+*/
+
+typedef struct {
+    PyObject_HEAD
+    double real;
+    double imag;
+} ComplexObject;
+
+// Complex functions:
+
+// ComplexType.conjugate() -> ComplexType
+PyObj Complex_Conjugate(ComplexObject* self) {
+    ComplexObject* result = self;
+    result->imag = -result->imag;
+
+    return result;
+}
+
+
+
+// Complex.__init__(self, real, imag):
+static int
+Complex_init(ComplexObject* self, PyObject* args)
+{
+    if (!PyArg_ParseTuple(args, "dd", &self->real, &self->imag)) {
         return NULL;
     };
 
-    // return pow(x, n):
-
-    double result;
-
-    result = pow(x, n);
-
-    return PyLong_FromDouble(result);
+    return 0;
 }
 
-// root(x: float, n: int) -> float
-PyObject* root(PyObject* self, PyObject* args) {
-    double x = 0.0;
-    double n = 0.0;
+// Complex.__repr__(self) -> str:
+PyObj Complex_repr(ComplexObject* self) {
+    return PyUnicode_FromFormat("%s+%pi", self->real, self->imag);
+}
 
-    if (!PyArg_ParseTuple(args, "di", &x, &n)) {
+
+static PyMemberDef Complex_members[] = {
+
+    {"real", T_FLOAT, offsetof(ComplexObject, real), 0,
+     "The real part of a complex number"},
+     {"imag", T_FLOAT, offsetof(ComplexObject, imag), 0,
+     "The imaginary part of a complex number"},
+    {NULL}  /* Sentinel */
+};
+
+
+static PyMethodDef Complex_methods[] = {
+    // {name, c_function, flags, doc}
+    {"conjugate", (PyCFunction)Complex_Conjugate, METH_NOARGS, "conjugate() -> complex \nReturn self, but conjugated."},
+    {NULL}  /* Sentinel */
+};
+
+static PyTypeObject ComplexType = {
+    PyVarObject_HEAD_INIT(NULL, 0)
+    .tp_name = "_c_math.ComplexType",
+    .tp_doc = "A type representing complex numbers. ",
+    .tp_basicsize = sizeof(ComplexObject),
+    .tp_itemsize = 0,
+    .tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,
+    .tp_new = PyType_GenericNew,
+    .tp_init = (initproc)Complex_init,
+    .tp_members = Complex_members,
+    .tp_methods = Complex_methods,
+    .tp_repr = (reprfunc)Complex_repr,
+};
+
+
+
+
+/*
+* Class Infinite():
+*/
+typedef struct {
+    PyObject_HEAD
+    int pos;
+} InfiniteObject;
+
+
+// Infinite.invert() -> None :
+PyObj Infinite_Invert(InfiniteObject* self) {
+    if (self->pos == 0) {
+        self->pos = 1;
+    }
+    else {
+        self->pos = 0;
+    }
+
+    Py_RETURN_NONE;
+}
+
+// Infinite.__init__(self, positive):
+static int
+Infinite_init(InfiniteObject* self, PyObject* args)
+{
+    int positive;
+
+
+    if (!PyArg_ParseTuple(args, "p", &positive)) {
+
         return NULL;
     };
 
-    return PyLong_FromDouble(pow(x, 1 / n));
+    self->pos = positive;
+
+    return 0;
 }
 
-/*
- * List of functions to add to _c_maths in exec__c_maths().
- */
-static PyMethodDef _c_maths_functions[] = {
-    { "exp", (PyCFunction)exp_, METH_VARARGS, exp__doc },
-    { "power", (PyCFunction)power_, METH_VARARGS, pow__doc },
-    { "root", (PyCFunction)root, METH_VARARGS, root_doc },
-    { NULL, NULL, 0, NULL } /* marks end of array */
+
+static PyMemberDef Infinite_members[] = {
+    
+    {"pos", T_BOOL, offsetof(InfiniteObject, pos), 0,
+     "Whether value is +infinite."},
+    {NULL}  /* Sentinel */
 };
 
-/*
- * Initialize _c_maths. May be called multiple times, so avoid
- * using static state.
- */
-int exec__c_maths(PyObject *module_) {
-    PyModule_AddFunctions(module_, _c_maths_functions);
 
-    PyModule_AddType(module_, &InfiniteType);
-
-    PyModule_AddStringConstant(module_, "__author__", "Jerem");
-    PyModule_AddStringConstant(module_, "__version__", "1.0.0");
-    PyModule_AddIntConstant(module_, "year", 2021);
-    PyModule_AddIntConstant(module_, "e", exp(1));
-
-    return 0; /* success */
-}
-
-/*
- * Documentation for _c_maths.
- */
-PyDoc_STRVAR(_c_maths_doc, "Simple maths module directly made from c. Only for internal use.");
-
-
-static PyModuleDef_Slot _c_maths_slots[] = {
-    { Py_mod_exec, exec__c_maths },
-    { 0, NULL }
+static PyMethodDef Infinite_methods[] = {
+    {"invert", (PyCFunction)Infinite_Invert, METH_NOARGS,
+    "InfiniteType.invert() -> None\n Invert the infinite's sign."
+    },
+    {NULL}  /* Sentinel */
 };
 
-static PyModuleDef _c_maths_def = {
+static PyTypeObject InfiniteType = {
+    PyVarObject_HEAD_INIT(NULL, 0)
+    .tp_name = "_c_math.InfiniteType",
+    .tp_doc = "A type representing simple infinite values. ",
+    .tp_basicsize = sizeof(InfiniteObject),
+    .tp_itemsize = 0,
+    .tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,
+    .tp_new = PyType_GenericNew,
+    .tp_init = (initproc)Infinite_init,
+    .tp_members = Infinite_members,
+    .tp_methods = Infinite_methods,
+
+};
+
+// build the methods of _c_maths:
+static PyMethodDef _c_math_functions[] = {
+    // {method_name, method, flags, doc},
+    {"exp", (PyCFunction)exp_, METH_VARARGS, "exp(x: float) -> float \nReturn the image of x by the exponential function."},
+    {NULL, NULL, 0, NULL},
+};
+
+
+static PyModuleDef _c_math = {
     PyModuleDef_HEAD_INIT,
-    "_c_maths",
-    _c_maths_doc,
-    0,              /* m_size */
-    NULL,           /* m_methods */
-    _c_maths_slots,
-    NULL,           /* m_traverse */
-    NULL,           /* m_clear */
-    NULL,           /* m_free */
+    .m_name = "_c_maths",
+    .m_doc = "An extension made in C that implements simple math functions and types.",
+    .m_size = -1,
+    .m_methods = _c_math_functions,
 };
 
-PyMODINIT_FUNC PyInit__c_maths() {
-    return PyModuleDef_Init(&_c_maths_def);
+PyMODINIT_FUNC
+PyInit__c_maths(void)
+{
+    PyObject* m;
+    if (PyType_Ready(&InfiniteType) < 0)
+        return NULL;
+
+    if (PyType_Ready(&ComplexType) < 0)
+        return NULL;
+
+    m = PyModule_Create(&_c_math);
+
+    ComplexObject* i;
+    
+    i->imag = 1;
+    i->real = 0;
+
+    PyModule_AddObject(m, "e", PyFloat_FromDouble(exp(1)));
+    PyModule_AddObject(m, "i", i);
+
+    if (m == NULL)
+        return NULL;
+
+    Py_INCREF(&InfiniteType);
+    if (PyModule_AddObject(m, "InfiniteType", (PyObject*)&InfiniteType) < 0) {
+        Py_DECREF(&InfiniteType);
+        Py_DECREF(m);
+        return NULL;
+    }
+
+    Py_INCREF(&ComplexType);
+    if (PyModule_AddObject(m, "ComplexType", (PyObject*)&ComplexType) < 0) {
+        Py_DECREF(&ComplexType);
+        Py_DECREF(m);
+        return NULL;
+    }
+
+    return m;
 }
