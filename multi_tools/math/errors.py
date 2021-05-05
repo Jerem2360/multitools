@@ -1,4 +1,4 @@
-from multi_tools import exceptions
+from multi_tools.errors import exceptions
 
 
 class InfiniteDivisionError(exceptions.ErrorImitation):
