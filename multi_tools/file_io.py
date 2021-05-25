@@ -1,5 +1,6 @@
 from multi_tools.stdio import text_io
 
+
 def file(file_: str):
     """
     Open file <file_> for reading and writing,

@@ -2,17 +2,20 @@ from importlib import util
 from importlib.machinery import ModuleSpec
 from typing import overload
 
-def define(name: str, value):
-    globals()[name] = value
-
 
 def module_installed(module: str):
+    """
+    Search for module and return whether it exists.
+    """
     if util.find_spec(module) is not None:
         return True
     return False
 
 
 def import_module(module_name: str):
+    """
+    Import module programmatically.
+    """
     return Module(module_name)
 
 
@@ -76,7 +79,8 @@ class Module(Handle):
 
     def __init__(self, module=None):
         """
-        Make a variable with
+        Create and return a module object. If an existing module is found, gets
+        a copy of it.
         """
         self._module = None
         if isinstance(module, ModuleSpec):
@@ -89,7 +93,13 @@ class Module(Handle):
         Handle.__init__(self, "_module")
 
     def __repr__(self):
+        """
+        Implement repr(self)
+        """
         return repr(super().__super_getattr__("_module"))
 
     def __str__(self):
+        """
+        Implement str(self)
+        """
         return str(super().__super_getattr__("_module"))
