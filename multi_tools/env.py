@@ -1,6 +1,8 @@
 from importlib import util
 from importlib.machinery import ModuleSpec
 from typing import overload
+from types import FunctionType
+from threading import Thread
 
 
 def module_installed(module: str):
@@ -103,3 +105,12 @@ class Module(Handle):
         Implement str(self)
         """
         return str(super().__super_getattr__("_module"))
+
+
+class thread(object):
+    def __init__(self, function: FunctionType):
+        self._function = function
+
+    def __call__(self, *args, **kwargs):
+        Thread(target=self._function, args=args, kwargs=kwargs).start()
+
