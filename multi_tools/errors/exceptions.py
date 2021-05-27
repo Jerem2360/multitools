@@ -13,9 +13,10 @@ class IOError_(OSError):
 
 
 class ErrorImitation(BaseException):
-    def __init__(self, name="ErrorImitation", text="This may not be an error. It's only an imitation.", immediateRaise=True):
+    def __init__(self, name="ErrorImitation", text="This may not be an error. It's only an imitation.", immediateRaise=True, error=Exception):
         """
         Imitate a builtin exception, but with more flexibility.
+        An disadvantage is that it can return weird stack traces.
 
         Takes 2 optional arguments, as so:
 
@@ -31,7 +32,7 @@ class ErrorImitation(BaseException):
         Else, it should be False.
         """
         try:
-            raise Exception
+            raise error
         except:
             self.lines = []
             for line in traceback.TracebackException(*sys.exc_info()).format(chain=True):
@@ -47,6 +48,11 @@ class ErrorImitation(BaseException):
             sys.stderr.write(ln)
 
         sys.exit(1)
+
+
+class PropertyError(ErrorImitation):
+    def __init__(self, __text="unknown property."):
+        super().__init__(name="PropertyError", text=__text)
 
 
 def raise_(error: Type[ErrorImitation], name, text):
