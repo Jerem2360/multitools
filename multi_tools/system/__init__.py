@@ -1,4 +1,7 @@
-from multi_tools.system import env, dll
+import sys
+if sys.platform == 'win32':
+    from multi_tools.system import registry, dll
+from multi_tools.system import env
 from time import sleep as _slp
 import os
 
@@ -7,26 +10,27 @@ thread = env.thread
 
 import_module = env.import_module
 
-DLL = dll.Dll
+if sys.platform == 'win32':
+    DLL = dll.Dll
 
 
-class dlls:
-    _system32 = 'C:/windows/system32'
-    msvcrt = dll.Dll(_system32 + '/msvcrt.dll', dll_type=dll.Dll.WinDll)
-    user32 = dll.Dll(_system32 + '/user32.dll', dll_type=dll.Dll.CDll)
-    kernel32 = dll.Dll(_system32 + '/kernel32.dll', dll_type=dll.Dll.WinDll)
-    devinv = dll.Dll(_system32 + '/devinv.dll', dll_type=dll.Dll.WinDll)
-    devmgr = dll.Dll(_system32 + '/devmgr.dll', dll_type=dll.Dll.WinDll)
+    class dlls:
+        _system32 = 'C:/windows/system32'
+        msvcrt = dll.Dll(_system32 + '/msvcrt.dll', dll_type=dll.Dll.WinDll)
+        user32 = dll.Dll(_system32 + '/user32.dll', dll_type=dll.Dll.CDll)
+        kernel32 = dll.Dll(_system32 + '/kernel32.dll', dll_type=dll.Dll.WinDll)
+        devinv = dll.Dll(_system32 + '/devinv.dll', dll_type=dll.Dll.WinDll)
+        devmgr = dll.Dll(_system32 + '/devmgr.dll', dll_type=dll.Dll.WinDll)
 
 
-class dllgroup:
-    def __init__(self, source_path: str):
-        if not os.path.exists(source_path):
-            raise NotADirectoryError(f"Unable to find directory '{source_path}'.")
-        self.path = source_path
+    class dllgroup:
+        def __init__(self, source_path: str):
+            if not os.path.exists(source_path):
+                raise NotADirectoryError(f"Unable to find directory '{source_path}'.")
+            self.path = source_path
 
-    def add(self, dllname: str):
-        self.__setattr__(dllname, dll.Dll(self.path + '/' + dllname + '.dll', dll_type=dll.Dll.AnyDll))
+        def add(self, dllname: str):
+            self.__setattr__(dllname, dll.Dll(self.path + '/' + dllname + '.dll', dll_type=dll.Dll.AnyDll))
 
 
 def wait(time_secs: int or float):

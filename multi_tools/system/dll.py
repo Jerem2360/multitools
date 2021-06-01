@@ -1,5 +1,9 @@
 from multi_tools.system.env import Handle
 import ctypes
+import sys
+
+if sys.platform != 'win32':
+    raise NotImplementedError('This library works only on Windows!')
 
 
 class Dll(Handle):
