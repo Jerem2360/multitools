@@ -3,6 +3,7 @@ from importlib.machinery import ModuleSpec
 from typing import overload
 from types import FunctionType
 from threading import Thread
+import sys
 
 
 def module_installed(module: str):
@@ -113,4 +114,19 @@ class thread(object):
 
     def __call__(self, *args, **kwargs):
         Thread(target=self._function, args=args, kwargs=kwargs).start()
+
+    @staticmethod
+    def print(*args, sep=' ', end='\n', flush=False, file=sys.stdout):
+        text = ""
+        counter = 0
+        for word in args:
+            word = str(word)
+            text += word
+            if counter < (len(args) - 1):
+                text += sep
+        text += end
+
+        file.write(text)
+        if flush:
+            file.flush()
 

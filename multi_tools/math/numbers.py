@@ -1,4 +1,4 @@
-from multi_tools import env
+from multi_tools.system import env
 from typing import overload, Union, Literal, Any
 from multi_tools.math.errors import InfiniteDivisionError
 
