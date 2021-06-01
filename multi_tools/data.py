@@ -33,3 +33,10 @@ class Registry:
             raise StopIteration
 
 
+class Reflect:
+    def __init__(self, object_):
+        self._target = object_
+
+    def __call__(self, attr: str):
+        return self._target.__getattribute__(attr)
+

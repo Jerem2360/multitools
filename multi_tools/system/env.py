@@ -1,6 +1,6 @@
 from importlib import util
 from importlib.machinery import ModuleSpec
-from typing import overload
+from typing import overload, Final
 from types import FunctionType
 from threading import Thread
 import sys
@@ -136,4 +136,31 @@ class thread(object):
         file.write(text)
         if flush:
             file.flush()
+
+
+class ThreadContainer:
+    def __init__(self, immediate_start=False, args: tuple = None, kwargs: dict = None):
+        self._thread = None
+
+        if immediate_start:
+            if args is None:
+                args = ()
+            if kwargs is None:
+                kwargs = {}
+            self.start(*args, **kwargs)
+
+    def main(self, *args, **kwargs):
+        pass
+
+    def start(self, *args, **kwargs):
+        self._thread = Thread(target=self.main, args=args, kwargs=kwargs)
+        self._thread.start()
+
+    @property
+    def thread(self):
+        return self._thread
+
+    def __getitem__(self, item):
+        if not item.startswith('_'):
+            return self._thread.__getattribute__(item)
 
