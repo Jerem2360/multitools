@@ -61,8 +61,11 @@ class Handle(object):
         if hasattr(super().__getattribute__(super().__getattribute__("_target")), item):
             target = super().__getattribute__("_target")
             return super().__getattribute__(target).__getattribute__(item)
-        # if none of them is found, just return None:
-        return None
+        # if none of them is found, raise AttributeError with customizable message:
+        raise AttributeError(self._attribute_error_message(item))
+
+    def _attribute_error_message(self, item):
+        return f'{self} has no attribute "{item}"'
 
     def __super_getattr__(self, name):
         """
@@ -71,6 +74,10 @@ class Handle(object):
         Used to get attributes from the real self.
         """
         return super().__getattribute__(name)
+
+    def __repr__(self):
+        target_name = super().__getattribute__("_target")
+        return f'<"{target_name}" handle at {hex(id(self))}>'
 
 
 class Module(Handle):
