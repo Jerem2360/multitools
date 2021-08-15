@@ -1,13 +1,13 @@
 import sys
 if sys.platform == 'win32':
     from multi_tools.system import registry, dll
-from multi_tools.system import env
+from multi_tools.system import env, functional, runtime
 from multi_tools.system.generics import optional
 from time import sleep as _slp
 import os
 
 
-thread = env.thread
+thread =runtime.thread
 
 import_module = env.import_module
 
@@ -48,4 +48,10 @@ DecoratorWithParams = env.ParametrizedDecoratorFunc
 DllImport = dll.DllImport
 
 
-Thread = env.ThreadContainer
+Thread = runtime.ThreadContainer
+
+
+class Functional:
+    @staticmethod
+    def lambda_(code, *args): return functional.lambda_statement(code, *args)
+
