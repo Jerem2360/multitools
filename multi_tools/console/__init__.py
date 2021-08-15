@@ -1,6 +1,7 @@
 from multi_tools.console import io
 from multi_tools.console.colors import BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE
 from multi_tools.console import colors, control
+import sys
 
 OStream = io.OStream  # A type that represents output (write) streams.
 
@@ -16,4 +17,5 @@ def configure():
     colors.Ansi.enable_ansi()
 
 
+print = io.print_
 

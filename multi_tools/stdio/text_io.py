@@ -1,7 +1,11 @@
 from typing import overload, List, final
 from _io import TextIOWrapper
 from time import sleep as wait
+from multi_tools import data
 import os
+
+
+registry = data.Registry()
 
 
 class TextIO:
@@ -41,6 +45,8 @@ class TextIO:
             self._name = self._io_stream.name
         else:
             self._name = customName
+
+        registry.save(self._name, self)
 
     @final
     def write(self, text: str, cut_content=True, end="\n") -> None:
@@ -144,14 +150,26 @@ class TextIO:
 
         return buffer
 
-    def __repr__(self):
+    def _stream_type(self):
         stream_type = ""
         if self._io_stream.readable():
             stream_type += "I"
         if self._io_stream.writable():
             stream_type += "O"
+        return stream_type
 
-        return f"<TextIO at {id(self)}, name='{self._name}', type={stream_type}>"
+    def __repr__(self):
+
+        return f"<TextIO at {id(self)}, name='{self._name}', type={self._stream_type()}>"
+
+    def flush(self): self._io_stream.flush()
+
+    @staticmethod
+    def by_name(name: str):
+        return registry[name]
+
+    @property
+    def type(self): return self._stream_type()
 
 
 class _Stream:

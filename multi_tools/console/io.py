@@ -1,7 +1,10 @@
 from multi_tools.stdio import text_io
+from multi_tools import system
 from multi_tools.console.colors import AnsiColor
 from multi_tools.console import colors, io_counters
+from typing import Union
 import sys
+
 
 class OStream(text_io.TextIO):
 
@@ -55,3 +58,46 @@ class IStream(text_io.TextIO):
         super().__read__(size, spec=True)
 
 
+def print_(*args, sep: str = ' ', end: str = '\n', flush: bool = False, file: Union[text_io.TextIOWrapper, text_io.TextIO] = sys.stdout):
+    """
+    A cleaner version of print().
+    """
+    text = ""
+    counter = 0
+    for word in args:
+        word = str(word)
+        text += word
+        if counter < (len(args) - 1):
+            text += sep
+    text += end
+
+    file.write(text)
+    if flush:
+        file.flush()
+
+
+class _Msvcrt:
+    @staticmethod
+    @system.DllImport("C:/windows/system32/msvcrt.dll")
+    def printf(text: bytes):
+        """
+        A C version of print(): prints bytes to the console.
+        """
+        pass
+
+
+def printb(*args, sep: str = ' ', end: str = '\n'):
+    """
+    A more optimized version of print().
+
+    """
+    text = ""
+    counter = 0
+    for word in args:
+        word = str(word)
+        text += word
+        if counter < (len(args) - 1):
+            text += sep
+    text += end
+
+    _Msvcrt.printf(bytes(text))

@@ -5,7 +5,7 @@ if sys.platform != 'win32':
     raise NotImplementedError("Module is only implemented on Windows.")
 
 
-class Key(winreg.HKEYType):
+class Key:
 
     def __init__(self, key: winreg.HKEYType, subkey: str):
         self._owner = key

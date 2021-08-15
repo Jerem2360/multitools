@@ -2,6 +2,7 @@ import sys
 if sys.platform == 'win32':
     from multi_tools.system import registry, dll
 from multi_tools.system import env
+from multi_tools.system.generics import optional
 from time import sleep as _slp
 import os
 
@@ -42,3 +43,9 @@ class Module(env.Module):
     def is_installed(name: str):
         return env.module_installed(name)
 
+
+DecoratorWithParams = env.ParametrizedDecoratorFunc
+DllImport = dll.DllImport
+
+
+Thread = env.ThreadContainer
