@@ -1,8 +1,13 @@
-# from multi_tools.math.numbers import *
+from multi_tools.math import geometrical
 
 """
 Module that contains useful maths functions and classes.
 """
+
+
+Point = geometrical.Point
+Vector2D = geometrical.Vector2D
+
 
 class Counter:
     def __init__(self, name: str, value: int):
