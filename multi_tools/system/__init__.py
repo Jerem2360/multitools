@@ -2,12 +2,11 @@ import sys
 if sys.platform == 'win32':
     from multi_tools.system import registry, dll
 from multi_tools.system import env, functional, runtime
-from multi_tools.system.generics import optional
 from time import sleep as _slp
 import os
 
 
-thread =runtime.thread
+thread = runtime.thread
 
 import_module = env.import_module
 

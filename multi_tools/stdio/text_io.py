@@ -1,4 +1,4 @@
-from typing import overload, List, final
+from typing import overload, List, final, Union
 from _io import TextIOWrapper
 from time import sleep as wait
 from multi_tools import data

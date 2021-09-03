@@ -1,4 +1,5 @@
 from multi_tools.system.env import Handle, ParametrizedDecoratorFunc
+from multi_tools import common
 from typing import Union
 from types import MethodType, FunctionType
 import ctypes
@@ -86,14 +87,19 @@ def DllImport(func: Union[FunctionType, MethodType], file: Union[str, PathLike],
     If you don't need it, please use the 'Dll' class directly.
     """
     dll = Dll(file, type_)
-    name = func.__qualname__.split('.')[-1]
+    name = func.__name__
     dll_name = file.split('/')[-1]
 
     if not hasattr(dll, name):
         # if the function is not found in dll:
         raise AttributeError("Dll \"{0}\" has no function named \"{1}\".".format(dll_name, name))
 
-    result = getattr(dll, name)
+    def new_function(*args):
+        _func = getattr(dll, name)
+        _args = [common.Dll.basic_type_wrap(a) for a in args]
+        args = tuple(_args)
+        res = _func(*args)
+        return common.Dll.basic_type_unwrap(res)
 
     if func.__defaults__ is not None:
         # if keyword arguments are found in the decorated function:
@@ -103,7 +109,7 @@ def DllImport(func: Union[FunctionType, MethodType], file: Union[str, PathLike],
         # if decorated function declared a body:
         raise SystemError("A dll hint function can't declare a body.")
 
-    result.__doc__ = func.__doc__
+    new_function.__doc__ = func.__doc__
 
-    return result
+    return new_function
 
