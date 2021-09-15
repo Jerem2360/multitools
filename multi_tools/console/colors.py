@@ -39,7 +39,10 @@ class AnsiColor:
         self.id = code
 
     def __repr__(self):
-        return f"<AnsiConsoleColor at {id(self)}, code={self.id}>"
+        """
+        Implement repr(self)
+        """
+        return f"<AnsiConsoleColor at {id(self)}, code={self.id}, type=Fg.standardColor>"
 
 
 class CustomAnsiObject:

@@ -1,7 +1,9 @@
+from multi_tools import common, functional
 from types import FunctionType, MethodType
 from typing import Union
 from threading import Thread
 import sys
+import ctypes
 
 
 class thread_(object):
@@ -100,3 +102,36 @@ class ThreadContainer:
         file.write(text)
         if flush:
             file.flush()
+
+
+def getAdminRights():
+    res = ctypes.windll.shell32.ShellExecuteW(None, "runas", sys.executable, " ".join(sys.argv), None, 1)
+    if res >= 32:
+        return common.CallResults.SUCCESS
+    return common.CallResults.FAILURE
+
+
+def isUserAnAdmin():
+    try:
+        return ctypes.windll.shell32.IsUserAnAdmin()
+    except:
+        return False
+
+def needsAdmin(function):
+    def _wrapper(*args, **kwargs):
+        if isUserAnAdmin():
+
+            return function(*args, **kwargs)
+        else:
+            if getAdminRights() == common.CallResults.SUCCESS:
+                return function(*args, **kwargs)
+            else:
+                raise PermissionError("Access denied.")
+
+    _wrapper = functional.copy_function_data(function, _wrapper)
+
+    return _wrapper
+
+
+
+

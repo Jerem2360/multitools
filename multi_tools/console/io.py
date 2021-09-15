@@ -13,7 +13,7 @@ class OStream(text_io.TextIO):
         A type that represents a console stream that
         can write to the console, but has it's own text foreground
         color that doesn't act on the other streams' fg colors.
-        This way, you can easily write in different color to the
+        This way, you can easily write in different colors to the
         console without bothering about ansi.
         Takes one optional argument '__color_fg' defining the foreground
         color of the text it will print to the console.

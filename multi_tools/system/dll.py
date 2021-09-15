@@ -1,5 +1,5 @@
-from multi_tools.system.env import Handle, ParametrizedDecoratorFunc
-from multi_tools import common
+from multi_tools.system.env import Handle
+from multi_tools import common, functional
 from typing import Union
 from types import MethodType, FunctionType
 import ctypes
@@ -56,7 +56,7 @@ class Dll(Handle):
         return False
 
 
-@ParametrizedDecoratorFunc
+@functional.DecoratorWithParams
 def DllImport(func: Union[FunctionType, MethodType], file: Union[str, PathLike], type_: type[Dll.AnyDll] = Dll.WinDll):
     """
     Function decorator that implements dll functions

@@ -1,4 +1,3 @@
-import typing
 
 
 def Generic(clas: type):
