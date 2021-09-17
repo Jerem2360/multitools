@@ -1,0 +1,4 @@
+1.0.7
+- added dll updater (see multi_tools/__init__.py for more info)
+- reversed changes on setup.py
+- added multi_tools.typing.Generic type
