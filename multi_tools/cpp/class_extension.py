@@ -5,7 +5,10 @@ from types import FunctionType
 
 
 if not os.path.exists(config.Cpp.APPDATA):
-    os.mkdir(config.Cpp.APPDATA)
+    try:
+        os.mkdir(config.Cpp.APPDATA)
+    except FileNotFoundError:
+        pass
 
 
 def search_dll(name: str) -> ctypes.CDLL:
@@ -61,7 +64,6 @@ class _Header:
         return_type = function.__annotations__.get("return")
         self.func = _wrap
         self.func.restype = self.return_type_logic[return_type]
-        print(self.func.restype)
 
     @staticmethod
     def wrapper_special(name, self_or_cls, *args):
@@ -139,7 +141,7 @@ def HeaderFunc(func):
 
 
 @functional.DecoratorWithParams
-def HeaderClass(cls: type, dll: str, type_: type[ctypes.CDLL] = ctypes.CDLL):
+def HeaderClass(cls: type, dll: str, type_: type[ctypes.CDLL] = ctypes.CDLL, no_errors=False):
     """
     -> Parameters:
         dll: 'os.pathlike'
@@ -159,6 +161,19 @@ def HeaderClass(cls: type, dll: str, type_: type[ctypes.CDLL] = ctypes.CDLL):
 
     See example in 'system.memory.Pointer'.
     """
-    config.Cpp.dll_type = type_
-    cls.__dll__ = search_dll(dll)
-    return cls
+    if no_errors:
+        try:
+            config.Cpp.dll_type = type_
+            cls.__dll__ = search_dll(dll)
+            return cls
+        except ReferenceError:
+
+            class UnknownDll:
+                def __init__(self):
+                    raise TypeError(f"'{self.__class__.__name__}' object can't be initialized due to a missing .dll file.")
+
+            return type(cls.__name__, (UnknownDll,), {})
+    else:
+        config.Cpp.dll_type = type_
+        cls.__dll__ = search_dll(dll)
+        return cls

@@ -35,10 +35,11 @@ class Address:
         return hex_
 
 
-@HeaderClass("pointer.dll", type_=config.Cpp.WinDLL)
+@HeaderClass("pointer.dll", type_=config.Cpp.WinDLL, no_errors=True)
 class Pointer:
     """
     A simple pointer type that points to a specific object's location in memory.
+    If 'pointer.dll' does not exist, this class is useless.
     """
     @HeaderFunc
     def __init__(self, target) -> None:
@@ -70,4 +71,3 @@ def addressof(__object: object) -> Pointer:
     Return a pointer to __object.
     """
     return Pointer(__object)
-

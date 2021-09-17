@@ -38,4 +38,7 @@ DllImport = dll.DllImport
 Thread = runtime.ThreadContainer
 
 
-addressof = memory.addressof
+try:
+    addressof = memory.addressof
+except AttributeError:
+    pass
