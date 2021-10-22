@@ -172,6 +172,9 @@ def HeaderClass(cls: type, dll: str, type_: type[ctypes.CDLL] = ctypes.CDLL, no_
                 def __init__(self):
                     raise TypeError(f"'{self.__class__.__name__}' object can't be initialized due to a missing .dll file.")
 
+                def __repr__(self):
+                    return f"<Unknown dll header at {common.format_id(self)}>"
+
             return type(cls.__name__, (UnknownDll,), {})
     else:
         config.Cpp.dll_type = type_

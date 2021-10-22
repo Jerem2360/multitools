@@ -71,4 +71,8 @@ class Dll:
         return py_object(value)
 
 
+def format_id(o: object):
+    return "0x" + str(hex(id(o))).removeprefix("0x").upper()
+
+
 

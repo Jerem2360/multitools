@@ -11,6 +11,10 @@ if sys.platform != 'win32':
     raise NotImplementedError('This library works only on Windows!')
 
 
+VoidPointer = ctypes.c_void_p
+Array = ctypes.Array
+
+
 class Dll(Handle):
     AnyDll = ctypes.CDLL
     CDll = ctypes.CDLL

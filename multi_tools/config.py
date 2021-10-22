@@ -39,7 +39,7 @@ class _List:
 
 class Cpp:
     SYS32 = "C:/Windows/System32/"
-    APPDATA = os.getenv('AppData') + '\\.pyCpp\\'  # "C:/Users/jlefo/AppData/Roaming/.pyCpp/"
+    APPDATA = os.getenv('AppData') + '\\.pyCpp\\'  # "C:/Users/XXX/AppData/Roaming/.pyCpp/" or %AppData%
     search_paths = _List(["", SYS32, APPDATA])
     CDLL = ctypes.CDLL
     WinDLL = ctypes.WinDLL

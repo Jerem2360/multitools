@@ -11,7 +11,7 @@ bothering with relative paths.
 
 
 # List of dlls that need to be imported / updated for multi_tools:
-dlls = ['pointer.dll']
+dlls = ['pointer.dll', 'memory.dll']
 
 
 if sys.platform != "win32":
@@ -21,12 +21,19 @@ if sys.platform != "win32":
     )
 
 
+def _tryopen(file):
+    if os.path.exists(file):
+        return open(file, "rb+")
+    return open(file, "xb+")
+
+
 def _copyfile(source, destination):  # helper function for copying files.
     s = open(source, "rb+")
     contents = s.read()
     s.close()
+    print(os.path.exists(destination))
     if os.path.exists(destination):
-        with open(destination, "rb+") as x:
+        with _tryopen(destination) as x:
             getdest = x.read()
 
         if getdest != contents:
@@ -35,12 +42,12 @@ def _copyfile(source, destination):  # helper function for copying files.
             dest_.write(contents)
             dest_.close()
     else:
-        with open(destination, "rb+") as x:
+        with _tryopen(destination) as x:
             getdest = x.read()
 
         if getdest != contents:
             sys.stderr.write("Updating multitools file '{0}'".format(dest))
-            dest_ = open(destination, "xb+")
+            dest_ = open(destination, "rb+")
             dest_.write(contents)
             dest_.close()
 
@@ -68,13 +75,11 @@ for dll in dlls:
 Importing functions from submodules:
 """
 
-
 from multi_tools import file_io
 from multi_tools import stdio
 from multi_tools import console
 from multi_tools import data
 from multi_tools import arrays
-
 
 # path-related functions:
 
@@ -84,7 +89,7 @@ openfile = file_io.file  # for a complete description, see multi_tools.file_io.f
 # file.write("hello")
 # x = file.read()
 
-createnewfile = file_io.nfile  # for a complete description, see multi_tools.file_io.nfile()
+createfile = file_io.nfile  # for a complete description, see multi_tools.file_io.nfile()
 # usage:
 # multi_tools.createnewfile("folder/example2.txt")
 

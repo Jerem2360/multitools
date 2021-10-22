@@ -43,7 +43,7 @@ if env.module_installed("_c_maths"):
             return f"{self.real}+{self.imag}i"
 
 
-    class infinite(_c_maths.InfiniteType):
+    class infinity(_c_maths.InfiniteType):
         _checker = False
         @overload
         def __init__(self, sign: Union[Literal["+"], Literal["-"]]): ...
