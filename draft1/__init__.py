@@ -3,7 +3,7 @@ Library offering various system-related tools.
 
 It does several things when imported.
 Let me call the 'importer scope' the current scope at the moment where
-multitools was imported by a program.
+draft1 was imported by a program.
 
 Inside the importer scope and all of its subsequent scopes (except C function calls),
 the behaviour of the 'raise' statement is modified as follows:

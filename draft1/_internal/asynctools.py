@@ -22,7 +22,7 @@ class AsyncMapIterator:
 class AsyncMap(dict):
     """
     Thread-safe mapping.
-    Threads must wait their turn to read or write date here.
+    Threads must wait their turn to read or write data here.
     """
 
     __slots__ = (

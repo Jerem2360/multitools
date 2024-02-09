@@ -29,9 +29,7 @@ BYTEORDER = platform.byteorder
 thread.begin()  # main thread has started, so trigger the setup code.
 
 import _thread as _th
-import threading as _thr
 runtime.TState._main = _th.get_ident()
-runtime.TState._static_lock = _th.allocate_lock()
 
-del platform, runtime, thread, _th, _thr
+del platform, runtime, thread, _th
 

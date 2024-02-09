@@ -105,7 +105,7 @@ class _FrameMask:
             return
         if not hasattr(exc_val, '__info__'):  # in case our trace function is not installed
             import warnings
-            warnings.warn("An attempt to hide a frame from a stack trace was made, but multitools tracing function is not installed.", RuntimeWarning)
+            warnings.warn("An attempt to hide a frame from a stack trace was made, but draft1 tracing function is not installed.", RuntimeWarning)
             return
         # print(f"context manager exit, info is {getattr(exc_val, '__info__', None)}")
         exc_val.__info__.fignore.append(self._frame)
@@ -117,7 +117,7 @@ def frame_mask():
     frame will not appear in the stack trace printed to sys.stderr
     Yields the frame to be hidden if 'as' is used.
 
-    Note: multitools must have been imported at least once in the program
+    Note: draft1 must have been imported at least once in the program
     to enable this behaviour.
     """
     return _FrameMask()

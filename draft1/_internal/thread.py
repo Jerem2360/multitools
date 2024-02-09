@@ -29,5 +29,12 @@ def __terminate__():
 
 
 begin = __begin__
+"""
+Called each time a new python thread begins.
+Can be changed, but MUST call the original __begin__ once and only once.
+"""
 terminate = __terminate__
+"""
+Can be changed, but MUST call the original __terminate__ once and only once.
+"""
 

@@ -302,7 +302,7 @@ class TState:
                 invoke = self._invoke_queue.pop(0)
                 with errors.frame_mask():
                     try:
-                        invoke.call()
+                        invoke.expand()
                     except SystemExit:
                         raise
                     except:
@@ -325,7 +325,7 @@ class TState:
                 invoke = self._invoke_queue.pop(0)
                 with errors.frame_mask():
                     try:
-                        invoke.call()
+                        invoke.expand()
                     except SystemExit:
                         raise
                     except:
@@ -422,7 +422,7 @@ def __thread_terminate__():
     for invoke in state.invoke_queue:
         with errors.frame_mask():
             try:
-                invoke.call()
+                invoke.expand()
             except SystemExit:
                 return
             except:

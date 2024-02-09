@@ -1,10 +1,14 @@
-from multitools._internal.typecheck import typecheck
-from matplotlib import pyplot
+import _thread
 import time
 
+def th_code():
+    time.sleep(3)
 
-import sys
+
+_thread.start_new_thread(th_code, ())
+
+from draft5 import _internal
 
 
-typecheck(10, "test", True, int, str, int)
+time.sleep(5)
 
