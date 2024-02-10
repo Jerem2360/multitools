@@ -23,3 +23,10 @@ def getattr(obj, name):
     import builtins
     return builtins.getattr(obj, prefix + name)
 
+
+def dir(obj):
+    """
+    Return a list of the object's secret attribute names.
+    """
+    return list(n.removeprefix(prefix) for n in object.__dir__(obj) if n.startswith(prefix))
+

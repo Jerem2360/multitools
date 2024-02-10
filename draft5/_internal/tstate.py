@@ -165,9 +165,13 @@ class TState:
         return self
 
     def __init__(self, tid, frame):
+        import sys
         from .event_loop import EventLoop
         if self._initialized:
             return
+
+        if tid not in sys._current_frames():
+            raise ValueError(f"Unknown thread with id {hex(tid)}.")
 
         self._id = tid
         self._current_frame = FrameEmulator(frame)

@@ -1,14 +1,13 @@
+from draft5._internal import overwrite, secretattr
+
+
+import sys
 import _thread
-import time
-
-def th_code():
-    time.sleep(3)
 
 
-_thread.start_new_thread(th_code, ())
+print(dir(sys.settrace))
+print(sys.gettrace)
+print(_thread.start_new_thread)
 
-from draft5 import _internal
-
-
-time.sleep(5)
+print(secretattr.dir(sys.settrace))
 
