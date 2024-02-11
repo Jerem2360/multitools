@@ -10,8 +10,12 @@ def setattr(obj, name, value):
     Secret attributes can only be accessed through the object's __dict__
     attribute with a decorated name or via this method. The standard '.'
     syntax cannot be used to access them.
+    Note that secret attribute names can be the empty string.
+    However, they must satisfy the str.isidentifier() condition.
     """
     import builtins
+    if not (str(name).isidentifier() or str(name) == ''):
+        raise NameError("Secret attribute names must satisfy the identifier format.")
     return builtins.setattr(obj, prefix + name, value)
 
 

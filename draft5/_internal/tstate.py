@@ -177,6 +177,7 @@ class TState:
         self._current_frame = FrameEmulator(frame)
         self._first_frame = None
         self._event_loop = EventLoop()
+        self._tracefunc = lambda f, e, a: None
         self._traces = {
             '*': [],
             'call': [],
@@ -185,6 +186,7 @@ class TState:
             'exception': [],
             'opcode': [],
         }
+        self._is_alive = False
 
         self._initialized = True
 
@@ -200,6 +202,10 @@ class TState:
                 sys.excepthook(type(e), e, e.__traceback__)
                 return False
             return not need_remove
+
+        if not call_trace(self._tracefunc, frame, event, arg):
+            if event == 'call':
+                self._tracefunc = lambda f, e, a: None
 
         to_pop = []
         for trace in self._traces['*']:
@@ -234,13 +240,16 @@ class TState:
         while self.__event__():
             pass
 
+        # mark ourselves as no longer alive
+        self._is_alive = False
+
         # remove ourselves from the cache as the thread is about to exit
         try:
             del type(self)._cache[_thread.get_ident()]
         except:
             pass
         del self._first_frame
-        print('leaving')
+        #print('leaving')
 
     @classmethod
     def current(cls):
@@ -333,6 +342,9 @@ class TState:
 
         return id(frame) == id(self._first_frame)
 
+    def is_alive(self):
+        return self._is_alive
+
     def schedule_invoke(self, func, *args, **kwargs):
         """
         Schedule the specified function or callable to be
@@ -394,9 +406,32 @@ class TState:
         and it must take (frame, arg) as parameters.
         See sys.settrace for possible values of event.
         """
+        import sys
+        from . import code_utils
+
         if not callable(func):
             raise TypeError("func must be callable.")
         if event not in self._traces:
             raise ValueError("event must be one of", ', '.join(self._traces.keys()) + '.')
+
+        if event == '*':
+            if not code_utils._try_args(func, sys._getframe(), 'call', object()):
+                raise TypeError("Generic tracing function must accept 3 positional arguments (frame, event, arg).")
+        else:
+            if not code_utils._try_args(func, sys._getframe(), object()):
+                raise TypeError("Specialized tracing function must accept 2 positional arguments (frame, arg).")
+
         self._traces[event].append(func)
+
+    def settrace(self, tracefunc):
+        from . import code_utils
+        import sys
+        if not code_utils._try_args(tracefunc, sys._getframe(), 'call', object()):
+            raise TypeError("Generic tracing function must accept 3 positional arguments (frame, event, arg).")
+        res = self._tracefunc
+        self._tracefunc = tracefunc
+        return res
+
+    def gettrace(self):
+        return self._tracefunc
 

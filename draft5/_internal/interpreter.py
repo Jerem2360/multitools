@@ -107,20 +107,13 @@ class MainInterpreterState(InterpreterState):
 
         self._threads = {}
 
-        # prepare frames by storing their previous traces in their respective emulators
-        for tid, top_frame in sys._current_frames().items():
-            state = tstate.TState(tid, top_frame)
-            state.__prepare_frames__()
-            self._threads[tid] = state
-
+        # set up our trace function inside all existing threads
+        sys._settraceallthreads(self._trace)
         self._iid = _xxsubinterpreters.get_main()
 
-        # set up our trace function inside all threads
-        sys._settraceallthreads(self._trace)
-
-        # initialize all frames with our custom function
-        for tid, tstate in self._threads.items():
-            tstate.__wrap_frames__(self._trace)
+        # prepare frames by storing their previous traces in their respective emulators
+        for tid, top_frame in sys._current_frames().items():
+            self._prepare_tstate(tid, top_frame)
 
         """
         At this point, all threads have received our trace function and have it
@@ -129,8 +122,26 @@ class MainInterpreterState(InterpreterState):
 
         self._initialized = True
 
+    def _prepare_tstate(self, tid, frame):
+        from . import tstate
+        state = tstate.TState(tid, frame)
+
+        state.__prepare_frames__()
+        self._threads[tid] = state
+        state.__wrap_frames__(self._trace)
+        state._is_alive = True
+        return state
+
+    def _prepare_current_thread(self):
+        import sys
+        import _thread
+        sys.settrace._base(self._trace)
+        return self._prepare_tstate(_thread.get_ident(), sys._getframe())
+
     def _trace(self, frame, event, arg):
         from .tstate import FrameEmulator, TState
+
+        #print(frame, event, arg)
 
         # call the wrapped trace function using the frame emulation.
         frame_emulation = FrameEmulator(frame)

@@ -3,6 +3,7 @@ import _thread
 
 
 def _unsafe_overwrite(old):
+
     def _inner(new):
         overwritten = OverwrittenFunction(old, new)
         parent = _sys.modules[old.__module__]
@@ -75,29 +76,60 @@ class OverwrittenFunction:
         return "<overwritten " + repr(self._base).removeprefix('<')
 
     def __dir__(self):
-        res = {'_base', '_new', *dir(self._new), *dir(self._base)}  # using a set to avoid having twice the same name
+        res = {'_base', '_new', dir(self._new), *dir(self._base)}  # using a set to avoid having twice the same name
         return list(res)
 
 
+
+# the user must not be able to break our system using supported builtin functions:
+
 @_unsafe_overwrite(_sys.gettrace)
 def _my_gettrace(base):
-    return base()
+    """
+    Overwrite sys.gettrace, so it uses our TState system.
+    """
+    from .tstate import TState
+    return TState.current().gettrace()
 
 
 @_unsafe_overwrite(_sys.settrace)
 def _my_settrace(base, tracefunc, /):
-    return base(tracefunc)
+    """
+    Overwrite sys.settrace, so it uses our TState system.
+    """
+    from .tstate import TState
+    return TState.current().settrace(tracefunc)
 
+
+# we want to be notified when a new thread is created:
 
 @_unsafe_overwrite(_thread.start_new_thread)
-def _my_start_new_thread(base, function, args, kwargs=None):
-    from . import tstate
+def _my_start_new_thread(base, function, args, kwargs={}, /):
+    """
+    Override _thread._start_new_thread so our TState system is
+    notified when a new python thread is created.
+    """
+    from .interpreter import InterpreterState
+    from . import code_utils
+    from . import __root__, __internal_path__
 
-    tid = base(function, args, kwargs=kwargs)
+    if not callable(function):
+        raise TypeError("function must be callable.")
 
-    while tid not in _sys._current_frames():
-        pass
-    tstate.TState(tid, _sys._current_frames()[tid])
+    def _new_external_thread(*args, **kwargs):
+        InterpreterState.main()._prepare_current_thread()
+        function(*args, **kwargs)
 
-    return tid
+    _new_external_thread.__name__ = '<prepare_tstate>'
+    _new_external_thread.__qualname__ = '<prepare_tstate>'
+    _new_external_thread.__code__ = code_utils._copy_code(
+        _new_external_thread.__code__,
+        name='<prepare_tstate>',
+        qualname='<prepare_tstate>',
+        filename=__internal_path__
+    )
+    _new_external_thread.__module__ = __root__
+    _new_external_thread.__doc__ = None
+
+    return base(_new_external_thread, args, kwargs)
 
